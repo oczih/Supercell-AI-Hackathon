@@ -2,9 +2,11 @@ import React from 'react';
 
 function Loader() {
   return (
-    <div className="flex justify-center items-center py-12">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      <span className="ml-3 text-gray-600">Loading data...</span>
+    <div className="d-flex justify-content-center align-items-center py-5">
+      <div className="spinner-border text-primary me-3" role="status" style={{ width: '3rem', height: '3rem' }}>
+        <span className="visually-hidden">Loading...</span>
+      </div>
+      <span className="text-muted">Loading data...</span>
     </div>
   );
 }

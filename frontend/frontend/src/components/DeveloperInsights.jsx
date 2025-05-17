@@ -5,8 +5,8 @@ function DeveloperInsights({ insights }) {
   
   if (!insights || Object.keys(insights).length === 0) {
     return (
-      <div className="bg-gray-50 p-4 rounded-lg flex justify-center items-center h-64">
-        <p className="text-gray-500">Developer insights not available</p>
+      <div className="bg-light p-4 rounded d-flex justify-content-center align-items-center" style={{ height: '16rem' }}>
+        <p className="text-muted mb-0">Developer insights not available</p>
       </div>
     );
   }
@@ -41,72 +41,66 @@ function DeveloperInsights({ insights }) {
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-2">Developer Insights</h2>
-        <p className="text-gray-600">
+      <div className="mb-4">
+        <h2 className="h4 fw-bold mb-2">Developer Insights</h2>
+        <p className="text-muted">
           Top user feedback organized by category to help prioritize development efforts
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="mb-4 d-flex flex-wrap gap-2">
         {Object.entries(categories).map(([key, { label, icon }]) => (
           <button
             key={key}
             onClick={() => setActiveCategory(key)}
-            className={`px-4 py-2 rounded-md flex items-center ${
-              activeCategory === key 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-            }`}
+            className={`btn d-flex align-items-center ${activeCategory === key ? 'btn-primary text-white' : 'btn-light text-dark border'}`}
           >
-            <span className="mr-2">{icon}</span>
+            <span className="me-2">{icon}</span>
             <span>{label}</span>
-            <span className="ml-2 bg-white bg-opacity-20 px-2 rounded-full text-sm">
+            <span className="ms-2 badge bg-secondary">
               {insights[key]?.length || 0}
             </span>
           </button>
         ))}
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-6">
-        <div className="flex items-center mb-4">
-          <span className="text-2xl mr-3">{categories[activeCategory].icon}</span>
+      <div className="bg-light rounded p-4">
+        <div className="d-flex align-items-center mb-3">
+          <span className="fs-4 me-3">{categories[activeCategory].icon}</span>
           <div>
-            <h3 className="text-xl font-semibold">{categories[activeCategory].label}</h3>
-            <p className="text-gray-600">{categories[activeCategory].description}</p>
+            <h3 className="h5 fw-semibold mb-0">{categories[activeCategory].label}</h3>
+            <p className="text-muted mb-0">{categories[activeCategory].description}</p>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="d-grid gap-3">
           {insights[activeCategory] && insights[activeCategory].length > 0 ? (
             insights[activeCategory].map((item, index) => (
-              <div key={index} className="bg-white p-4 rounded-md border border-gray-200">
-                <div className="flex justify-between mb-2">
-                  <div className="flex items-center">
-                    <span className="font-medium text-gray-800">User Feedback</span>
-                    <span className={`ml-3 px-2 py-1 rounded text-xs ${
-                      item.sentiment >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+              <div key={index} className="bg-white p-3 rounded border">
+                <div className="d-flex justify-content-between mb-2">
+                  <div className="d-flex align-items-center">
+                    <span className="fw-medium text-dark">User Feedback</span>
+                    <span className={`ms-3 px-2 py-1 rounded text-sm ${item.sentiment >= 0 ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'}`}>
                       Sentiment: {item.sentiment.toFixed(1)}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-muted small">
                     Score: {item.score}
                   </div>
                 </div>
 
-                <div className="mb-3 text-gray-700 bg-gray-50 p-3 rounded border border-gray-100">
-                  <p className="whitespace-pre-line">{item.text}</p>
+                <div className="mb-3 text-dark bg-light p-3 rounded border">
+                  <p className="mb-0" style={{ whiteSpace: 'pre-line' }}>{item.text}</p>
                 </div>
 
                 <div>
-                  <p className="font-medium text-gray-700">Summary:</p>
-                  <p className="text-gray-600">{item.summary}</p>
+                  <p className="fw-medium text-dark mb-1">Summary:</p>
+                  <p className="text-muted mb-0">{item.summary}</p>
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-4 text-muted">
               No insights available for this category
             </div>
           )}

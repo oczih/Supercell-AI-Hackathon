@@ -6,7 +6,7 @@ from tqdm import tqdm
 import re
 
 class FeedbackAnalyzer:
-    def __init__(self, model_name="mistralai/Mistral-7B-Instruct-v0.2", device="cuda"):
+    def __init__(self, model_name="EleutherAI/gpt-neo-125M", device="cuda"):
         """
         Initialize the feedback analyzer with a local LLM.
         
@@ -42,34 +42,36 @@ class FeedbackAnalyzer:
     def analyze_comment(self, comment_text):
         """Analyze a single comment for sentiment and themes."""
         # Create prompt for the LLM
-        prompt = f"""Analyze this gaming-related comment:
-        
-"{comment_text}"
+        prompt = f"""Analyze this gaming-related comment and classify it:
 
-Respond in JSON format only:
-{{
-  "sentiment": "one of: very negative, negative, neutral, positive, very positive",
-  "sentiment_score": "number from -1.0 to 1.0",
-  "themes": ["list of main themes from: bugs/technical issues, game balance, gameplay mechanics, new features/content, monetization, community/social aspects, user interface, performance, praise/appreciation"],
-  "summary": "brief one-sentence summary of the comment"
-}}
-"""
-        
+        "{comment_text}"
+
+        Respond in strict JSON format with these keys only:
+        {{
+        "sentiment": "one of: very negative, negative, neutral, positive, very positive",
+        "sentiment_score": "number from -1.0 to 1.0",
+        "themes": ["choose at least one relevant theme from: bugs/technical issues, game balance, gameplay mechanics, new features/content, monetization, community/social aspects, user interface, performance, praise/appreciation"],
+        "summary": "brief one-sentence summary of the comment"
+        }}
+
+        If the comment is vague or unclear, still choose the most likely theme.
+        Do not leave 'themes' empty unless it's absolutely meaningless.
+        Only respond with a JSON object.
+        """
         # Generate response from the model
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
                 max_new_tokens=512,
-                temperature=0.1,  # Low temperature for more deterministic outputs
+                temperature=0.1,
                 do_sample=True
             )
-        
+
         response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
+
         # Extract JSON from response
         try:
-            # Find text between first '{' and last '}'
             json_text = re.search(r'\{.*\}', response, re.DOTALL)
             if json_text:
                 result = json.loads(json_text.group(0))
@@ -78,17 +80,17 @@ Respond in JSON format only:
                 return {
                     "sentiment": "neutral",
                     "sentiment_score": 0.0,
-                    "themes": [],
+                    "themes": ["unknown"],
                     "summary": "Failed to analyze comment"
                 }
         except json.JSONDecodeError:
-            # Fallback for malformed JSON
             return {
                 "sentiment": "neutral",
                 "sentiment_score": 0.0,
-                "themes": [],
+                "themes": ["parse_error"],
                 "summary": "Failed to analyze comment"
             }
+
     
     def batch_analyze(self, comments_df, text_column="body", batch_size=20):
         """Analyze a batch of comments from a DataFrame."""
@@ -157,23 +159,18 @@ Keep the summary brief but comprehensive.
 if __name__ == "__main__":
     analyzer = FeedbackAnalyzer()
 
-    # Single comment analysis
-    response = analyzer.analyze_comment("This game is confusing and hard to play.")
-    print(response)
+    # Lue kommentit
+    comments_df = pd.read_csv("clash_royale_comments_20250517_150746.csv")  # tai muuta tiedostonimeä
 
-    # Load comments from CSV
-    comments_df = pd.read_csv("clash_royale_comments_20240516_120000.csv")
-
-    # Batch analyze
+    # Analysoi batchina
     analysis_results = analyzer.batch_analyze(comments_df)
 
-    # Export results
-    analyzer.export_results(analysis_results, "clash_royale_analysis_results.csv")
+    # Tallenna koko analyysi yhteen tiedostoon (sentiment + themes)
+    analysis_results.to_json("sentiment.json", orient="records", lines=True)
 
-    # Generate summary for a specific post
-    post_id = "example_post_id"
-    post_comments = comments_df[comments_df['post_id'] == post_id]['body'].tolist()
-    if post_comments:
-        post_comments_text = "\n\n".join(post_comments[:20])  # Limit to first 20 comments
-        summary = analyzer.summarize_thread(post_comments_text)
-        print(f"Thread Summary for post {post_id}:\n{summary}")
+    # Tallenna pelkät teemat omaan tiedostoon
+    theme_data = analysis_results[["comment_id", "themes"]]
+    theme_data.to_json("themes.json", orient="records", lines=True)
+
+    print("Analyysi valmis. Tallennettu: sentiment.json ja themes.json")
+

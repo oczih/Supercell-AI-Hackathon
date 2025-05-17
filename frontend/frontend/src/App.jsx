@@ -14,7 +14,8 @@ import DeveloperInsights from './components/DeveloperInsights';
 import SettingsPanel from './components/SettingsPanel';
 
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+console.log("API_URL:", API_URL);
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -45,6 +46,7 @@ function App() {
       const response = await axios.get(`${API_URL}/status`);
       const { posts_loaded, comments_loaded, analysis_loaded } = response.data;
       setDataLoaded(posts_loaded && comments_loaded && analysis_loaded);
+      console.log(response.data);
     } catch (err) {
       console.error('Error checking data status:', err);
       setError('Failed to connect to the API server. Please ensure it is running.');
@@ -162,8 +164,8 @@ function App() {
                   className="form-select"
                   style={{ minWidth: '150px' }}
                 >
-                  <option value="hour">Hourly</option>
-                  <option value="day">Daily</option>
+                  <option value="day">Hourly</option>
+                  <option value="hour">Daily</option>
                   <option value="week">Weekly</option>
                 </select>
               </div>
@@ -229,7 +231,7 @@ function App() {
 
                     {/* Trending Topics */}
                     <div className="col-12 col-lg-6 bg-light rounded p-3">
-                      <h2 className="h5 fw-semibold mb-3">Trending Topics</h2>
+                      <h2 className="h5 fw-semibold mb-3">Trending Words/Topics</h2>
                       <div className="d-flex flex-wrap gap-2">
                         {trendingTopics.map((topic, index) => (
                           <span

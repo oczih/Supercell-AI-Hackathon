@@ -12,44 +12,44 @@ function SettingsPanel({ onLoadData, loading }) {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-4">Load Analysis Data</h2>
-      <p className="mb-6 text-gray-600">
+    <div className="bg-white p-4 rounded shadow-sm mx-auto" style={{ maxWidth: '600px' }}>
+      <h2 className="h4 mb-3">Load Analysis Data</h2>
+      <p className="text-muted mb-4">
         Enter the paths to your Reddit posts, comments, and sentiment analysis files.
       </p>
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block font-medium mb-1">Posts File Path</label>
+
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label className="form-label">Posts File Path</label>
           <input
             type="text"
             value={postsFile}
             onChange={(e) => setPostsFile(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md"
+            className="form-control"
             placeholder="e.g., data/posts.json"
             required
           />
         </div>
 
-        <div>
-          <label className="block font-medium mb-1">Comments File Path</label>
+        <div className="mb-3">
+          <label className="form-label">Comments File Path</label>
           <input
             type="text"
             value={commentsFile}
             onChange={(e) => setCommentsFile(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md"
+            className="form-control"
             placeholder="e.g., data/comments.json"
             required
           />
         </div>
 
-        <div>
-          <label className="block font-medium mb-1">Sentiment Analysis File Path</label>
+        <div className="mb-4">
+          <label className="form-label">Sentiment Analysis File Path</label>
           <input
             type="text"
             value={analysisFile}
             onChange={(e) => setAnalysisFile(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md"
+            className="form-control"
             placeholder="e.g., data/sentiment.json"
             required
           />
@@ -57,9 +57,7 @@ function SettingsPanel({ onLoadData, loading }) {
 
         <button
           type="submit"
-          className={`w-full px-4 py-2 text-white font-semibold rounded-md ${
-            loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
-          }`}
+          className={`btn w-100 fw-semibold ${loading ? 'btn-primary disabled' : 'btn-primary'}`}
           disabled={loading}
         >
           {loading ? 'Loading...' : 'Load Data'}

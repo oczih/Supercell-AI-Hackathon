@@ -1,11 +1,14 @@
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dataprocess import DataProcessor
 from scraper import RedditScraper
 from llm import FeedbackAnalyzer
 from fastapi import HTTPException, Query
 from typing import Optional
+import pandas as pd
+import math
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 origins = [
@@ -19,12 +22,11 @@ feedback_analyzer = None
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'], 
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # Optional: test the model on startup
 #response = feedback_analyzer.analyze_comment("This game is confusing and hard to play.")
 #print("Model response:", response)
@@ -49,16 +51,35 @@ async def load_data(req: LoadRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/trending-topics")
-async def trending_topics(limit: int = Query(10, ge=1)):
+async def trending_topics(limit: int = Query(30, ge=1)):
     return processor.get_trending_topics(limit=limit)
 
 @app.get("/api/sentiment-over-time")
 async def sentiment_over_time(period: str = Query("day")):
-    return processor.get_sentiment_over_time(time_period=period)
+    try:
+        data = processor.get_sentiment_over_time(time_period=period)  # kutsutaan funktiota
+        return JSONResponse(content=data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/top-comments")
-async def top_comments(limit: int = Query(10, ge=1), sort_by: str = Query("score")):
-    return processor.get_top_comments(limit=limit, sort_by=sort_by)
+async def top_comments(limit: int = Query(50, ge=1), sort_by: str = Query("score")):
+    try:
+        comments = processor.get_top_comments(limit=limit, sort_by=sort_by)
+        
+        # Tarkista tyyppi ja käsittele NaN
+        if isinstance(comments, pd.DataFrame):
+            comments = comments.where(pd.notnull(comments), None)
+            result = comments.to_dict(orient="records")
+        else:
+            def clean_dict(d):
+                return {k: (None if (isinstance(v, float) and math.isnan(v)) else v) for k, v in d.items()}
+            result = [clean_dict(c) for c in comments]
+
+        return result
+    except Exception as e:
+        print(f"Error in /api/top-comments: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/theme-distribution")
 async def theme_distribution():
@@ -107,3 +128,8 @@ async def analyze_comment(req: CommentRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@app.get("/api/test-cors")
+async def test_cors():
+    return {"message": "CORS should work now!"}

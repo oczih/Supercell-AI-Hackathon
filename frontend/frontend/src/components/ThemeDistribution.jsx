@@ -2,33 +2,29 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 function ThemeDistribution({ data }) {
-  // Convert the theme distribution object to an array for the chart
   const themeData = Object.entries(data).map(([theme, details]) => ({
     name: theme,
     value: details.count
   }));
 
-  // Sort by value descending
   themeData.sort((a, b) => b.value - a.value);
 
-  // Colors for the pie chart segments
   const COLORS = [
     '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a05195',
     '#d45087', '#f95d6a', '#ff7c43', '#ffa600', '#003f5c'
   ];
 
-  // Custom tooltip
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const theme = payload[0].name;
       const count = payload[0].value;
       const percentage = data[theme]?.percentage || 0;
-      
+
       return (
-        <div className="bg-white p-3 border border-gray-200 rounded shadow-md">
-          <p className="font-semibold">{theme}</p>
-          <p>Count: {count}</p>
-          <p>Percentage: {percentage.toFixed(1)}%</p>
+        <div className="bg-white p-3 border rounded shadow">
+          <p className="fw-semibold mb-1">{theme}</p>
+          <p className="mb-0">Count: {count}</p>
+          <p className="mb-0">Percentage: {percentage.toFixed(1)}%</p>
         </div>
       );
     }
@@ -37,15 +33,15 @@ function ThemeDistribution({ data }) {
 
   if (!data || Object.keys(data).length === 0) {
     return (
-      <div className="bg-gray-50 p-4 rounded-lg flex justify-center items-center h-64">
-        <p className="text-gray-500">Theme distribution not available</p>
+      <div className="bg-light p-4 rounded d-flex justify-content-center align-items-center" style={{ height: '16rem' }}>
+        <p className="text-muted mb-0">Theme distribution not available</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Theme Distribution</h2>
+    <div className="bg-light p-4 rounded">
+      <h2 className="h5 fw-semibold mb-4">Theme Distribution</h2>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
