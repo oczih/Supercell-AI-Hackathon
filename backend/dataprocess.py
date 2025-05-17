@@ -19,16 +19,27 @@ class DataProcessor:
         self.posts_df = pd.read_csv(posts_file) if posts_file else None
         self.comments_df = pd.read_csv(comments_file) if comments_file else None
         self.analysis_df = pd.read_csv(analysis_file) if analysis_file else None
-        
+
+        if self.analysis_df is not None:
+            print("Analysis DataFrame columns:", self.analysis_df.columns)
+        else:
+            print("Analysis DataFrame not loaded.")
+
+        if self.comments_df is not None:
+            print("Comments DataFrame columns:", self.comments_df.columns)
+        else:
+            print("Comments DataFrame not loaded.")
+
         # Convert datetime strings to datetime objects
         if self.posts_df is not None and 'created_utc' in self.posts_df.columns:
             self.posts_df['created_utc'] = pd.to_datetime(self.posts_df['created_utc'])
-        
+
         if self.comments_df is not None and 'created_utc' in self.comments_df.columns:
             self.comments_df['created_utc'] = pd.to_datetime(self.comments_df['created_utc'])
-        
+
         if self.analysis_df is not None and 'created_utc' in self.analysis_df.columns:
             self.analysis_df['created_utc'] = pd.to_datetime(self.analysis_df['created_utc'])
+
     
     def load_data(self, posts_file, comments_file, analysis_file=None):
         """Load data from CSV files."""
@@ -328,4 +339,4 @@ def status():
 
 # Run the Flask app
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8000)

@@ -5,3 +5,7 @@ transformers
 torch
 pandas
 tqdm
+praw
+flask
+flask_cors
+dotenv
